@@ -1,0 +1,164 @@
+package ${package.Controller};
+
+import ${package.Entity}.${entity};
+import ${package.Service}.${table.serviceName};
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.unis.crk.utils.ResultUtil;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
+import java.util.List;
+#if(${swagger2})
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+#end
+#if(${restControllerStyle})
+#else
+import org.springframework.stereotype.Controller;
+#end
+#if(${superControllerClassPackage})
+import ${superControllerClassPackage};
+#end
+
+/**
+ * <p>
+ * $!{table.comment} 前端控制器
+ * </p>
+ *
+ * @author ${author}
+ * @since ${date}
+ */
+#if(${swagger2})
+@Api(value = "$!{table.comment}",tags = {"$!{table.comment}"})
+#end
+#if(${restControllerStyle})
+@RestController
+#else
+@Controller
+#end
+@RequestMapping("#if(${package.ModuleName})/${package.ModuleName}#end#if(${controllerMappingHyphenStyle})${controllerMappingHyphen}#else${table.entityPath}#end")
+#if(${kotlin})
+class ${table.controllerName}#if(${superControllerClass}) : ${superControllerClass}()#end
+
+#else
+#if(${superControllerClass})
+public class ${table.controllerName} extends ${superControllerClass} {
+#else
+public class ${table.controllerName} {
+#end
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(${table.controllerName}.class);
+
+    #set($lowerCaseServiceName=${table.serviceName})
+    #set($lowerCaseServiceName=$lowerCaseServiceName.substring(1))
+    #set($lowerCaseServiceName=$lowerCaseServiceName.substring(0,1).toLowerCase()+$lowerCaseServiceName.substring(1))
+
+    @Autowired
+    private ${table.serviceName} ${lowerCaseServiceName};
+
+
+    /**
+     * 根据ID查询数据
+     * @param id
+     * @return
+     */
+    #if(${swagger2})
+    @ApiOperation(value="查询", notes="根据ID查询数据")
+    #end
+    @GetMapping("getOne/{id}")
+    public ResultUtil getOne(@PathVariable("id") String id){
+        LOGGER.info("入参为:{}",id);
+        ResultUtil<${entity}> data = new ResultUtil<>();
+        if (StringUtils.isEmpty(id)){
+            data.failed("传入的主键为空");
+            return data;
+        }
+        data.success(this.${lowerCaseServiceName}.getById(id));
+        return data;
+    }
+
+
+
+    /**
+     * 查询全部数据
+     * @return
+     */
+    #if(${swagger2})
+    @ApiOperation(value="查询", notes="查询全部数据")
+    #end
+    @GetMapping("getAll")
+    public ResultUtil getAll(){
+        ResultUtil<List<${entity}>> data = new ResultUtil<>();
+        data.success(this.${lowerCaseServiceName}.list());
+        return data;
+    }
+
+
+    /**
+     * 新增一条数据
+     * @param param
+     * @return
+     */
+    #if(${swagger2})
+    @ApiOperation(value="新增", notes="新增一条数据")
+    #end
+    @PostMapping("add")
+    public ResultUtil add(@RequestBody ${entity} param){
+        LOGGER.info("入参为:{}", param);
+        ResultUtil<Boolean> data = new ResultUtil<>();
+        if (ObjectUtils.isEmpty(param)){
+            data.failed("所接收对象为null");
+            return data;
+        }
+        data.success(this.${lowerCaseServiceName}.save(param));
+        return data;
+    }
+
+
+    /**
+     * 修改一条数据
+     * @param param
+     * @return
+     */
+    #if(${swagger2})
+    @ApiOperation(value="修改", notes="修改一条数据")
+    #end
+    @PatchMapping("edit")
+    public ResultUtil edit(@RequestBody ${entity} param){
+        LOGGER.info("入参为:{}", param);
+        ResultUtil<Boolean> data = new ResultUtil<>();
+        if (ObjectUtils.isEmpty(param)){
+            data.failed("所接收对象为null");
+            return data;
+        }
+        data.success(this.${lowerCaseServiceName}.updateById(param));
+        return data;
+    }
+
+
+    /**
+     * 根据ID删除数据
+     * @param id
+     * @return
+     */
+    #if(${swagger2})
+    @ApiOperation(value="删除", notes="根据ID删除数据")
+    #end
+    @DeleteMapping("delete/{id}")
+    public ResultUtil delete(@PathVariable("id") String id){
+        LOGGER.info("入参为:{}", id);
+        ResultUtil<Boolean> data = new ResultUtil<>();
+        if (StringUtils.isEmpty(id)){
+            data.failed("所接收id为null");
+            return data;
+        }
+        data.success(this.${lowerCaseServiceName}.removeById(id));
+        return data;
+    }
+
+
+}
+
+#end
